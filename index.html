@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FloatChat — Ocean Intelligence & Pearl Production Index (PPI) Fund</title>
+<meta name="description" content="Investor dashboard for FloatChat: AI-native BGC-Argo fleet rentals, 10-month hardware payback, 93% gross margins and grade-A pearl yield uplift.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23D4AF37'/%3E%3Cellipse cx='16' cy='16' rx='14' ry='5' fill='none' stroke='%23D4AF37' stroke-opacity='.5' transform='rotate(-18 16 16)'/%3E%3C/svg%3E">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: { ink:'#030303', abyss:'#0A192F', gold:'#D4AF37', champa:'#E9CE8F', golddeep:'#8A7430', mist:'#9BA6B2', alert:'#E4573D' },
+    fontFamily: { sans:['Inter','system-ui','sans-serif'], serif:['"Instrument Serif"','serif'], mono:['"JetBrains Mono"','ui-monospace','monospace'] }
+  }}
+};
+</script>
+
+<!-- Chart.js / GSAP / Lucide -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+
+<style>
+  :root{color-scheme:dark}
+  html{scroll-behavior:smooth}
+  body{background:#030303;color:#EDEDEF;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:rgba(212,175,55,.28);color:#fff}
+  ::-webkit-scrollbar{width:9px}
+  ::-webkit-scrollbar-thumb{background:#1a2129;border-radius:9px;border:2px solid #030303}
+  ::-webkit-scrollbar-track{background:#030303}
+  a,button{transition:color .25s,border-color .25s,background .25s,transform .25s,filter .25s}
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:1px solid rgba(212,175,55,.7);outline-offset:3px}
+
+  .label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#D4AF37;font-weight:600}
+  .eyebrow{display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#D4AF37;font-weight:600}
+  .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,transparent,#D4AF37)}
+  .fx{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:#E9CE8F}
+  .tabular{font-variant-numeric:tabular-nums}
+
+  /* reveal system */
+  [data-reveal]{opacity:0;transform:translateY(36px)}
+  html.no-anim [data-reveal]{opacity:1!important;transform:none!important}
+  .hline{display:block;overflow:hidden}
+  .hline>span{display:block;will-change:transform}
+
+  /* spotlight hover cards */
+  .chart-frame{background:rgba(255,255,255,.02);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.07);border-radius:1.25rem}
+  .spot{position:relative;overflow:hidden}
+  .spot::before{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(520px circle at var(--mx,50%) var(--my,50%),rgba(212,175,55,.06),transparent 55%);opacity:0;transition:opacity .45s;pointer-events:none;z-index:0}
+  .spot:hover::before{opacity:1}
+  .spot>*{position:relative;z-index:1}
+
+  /* sliders */
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;border-radius:2px;background:linear-gradient(90deg,#D4AF37 50%,rgba(255,255,255,.12) 50%);outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#0B0D10;border:2px solid #D4AF37;box-shadow:0 0 0 7px rgba(212,175,55,.12);cursor:grab;transition:box-shadow .25s,transform .25s}
+  input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 11px rgba(212,175,55,.16)}
+  input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.12)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#0B0D10;border:2px solid #D4AF37;box-shadow:0 0 0 7px rgba(212,175,55,.12);cursor:grab}
+  input[type=range]::-moz-range-track{height:2px;background:transparent}
+
+  /* hero ticker */
+  #tickTrack{display:flex;width:max-content;animation:tickmove 48s linear infinite}
+  .tgroup{display:flex;align-items:center}
+  .tk{display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;color:#9BA6B2;white-space:nowrap}
+  .tk::after{content:'';width:5px;height:5px;background:rgba(212,175,55,.45);transform:rotate(45deg);margin:0 26px}
+  @keyframes tickmove{to{transform:translateX(-50%)}}
+  .ticker:hover #tickTrack{animation-play-state:paused}
+
+  .pulse-dot{width:6px;height:6px;border-radius:50%;background:#FFDF00;box-shadow:0 0 10px rgba(255,223,0,.8);animation:pdot 2s ease-in-out infinite;flex:none}
+  @keyframes pdot{0%,100%{opacity:1}50%{opacity:.35}}
+  .caret{display:inline-block;width:2px;height:1.05em;background:#D4AF37;margin-left:3px;vertical-align:-.15em;animation:blink 1.05s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .scrollline{position:relative;width:1px;height:54px;background:rgba(255,255,255,.12)}
+  .scrollline::after{content:'';position:absolute;left:-1.5px;top:0;width:4px;height:4px;border-radius:50%;background:#D4AF37;animation:sdot 2.3s cubic-bezier(.4,0,.4,1) infinite}
+  @keyframes sdot{0%{transform:translateY(0);opacity:0}18%{opacity:1}75%{opacity:1}100%{transform:translateY(50px);opacity:0}}
+
+  /* film grain + vignette */
+  .grain{position:fixed;inset:0;z-index:70;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .vignette{position:fixed;inset:0;z-index:5;pointer-events:none;background:radial-gradient(120% 85% at 50% 42%,transparent 55%,rgba(0,0,0,.55) 100%)}
+
+  /* buttons */
+  .btn-gold{background:linear-gradient(180deg,#E9CE8F,#C9A24B);color:#191203}
+  .btn-gold:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn-ghost{border:1px solid rgba(255,255,255,.16)}
+  .btn-ghost:hover{border-color:rgba(212,175,55,.55);background:rgba(212,175,55,.06);transform:translateY(-1px)}
+  .badge-glow{box-shadow:0 0 30px rgba(212,175,55,.1),inset 0 0 12px rgba(212,175,55,.05)}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.12);background:rgba(5,7,10,.5);backdrop-filter:blur(8px);padding:7px 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px}
+
+  /* table bits */
+  .secs{font-size:10px;font-weight:700;letter-spacing:.26em;color:#D4AF37}
+  .chipmini{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#9BA6B2;border:1px solid rgba(255,255,255,.14);padding:3px 8px;border-radius:999px;margin-left:10px;white-space:nowrap}
+  .chipmini.gold{color:#E9CE8F;border-color:rgba(212,175,55,.4);background:rgba(212,175,55,.06)}
+
+  /* pearl drag proxy */
+  #pearlDrag{cursor:grab;touch-action:none}
+  #pearlDrag.grabbing{cursor:grabbing}
+
+  /* SVG fleet map */
+  .fnode{cursor:pointer}
+  .fnode .covring{transition:stroke .3s,fill .3s}
+  .fnode:hover .covring{stroke:rgba(212,175,55,.75);fill:rgba(212,175,55,.09)}
+  .nlabel{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;fill:rgba(233,206,143,.7)}
+  .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.8s ease-out infinite}
+  @keyframes pulse{0%{transform:scale(.6);opacity:.9}70%,100%{transform:scale(3.6);opacity:0}}
+  .scaletext{font-family:'JetBrains Mono',monospace;font-size:9px;fill:rgba(255,255,255,.4);letter-spacing:.15em}
+
+  #anomalyBadge{transition:opacity .45s,transform .45s}
+  .gradebar{transition:width .8s cubic-bezier(.22,1,.36,1)}
+  .segBtn.active{background:#D4AF37;color:#161003;font-weight:600}
+
+  /* header */
+  #siteHeader{transition:background .35s,border-color .35s}
+  #siteHeader.scrolled{background:rgba(3,3,3,.72);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)}
+
+  /* modal */
+  #modalBackdrop{opacity:0;transition:opacity .3s}
+  .mpanel{opacity:0;transform:translateY(18px) scale(.97);transition:opacity .35s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.22,1,.36,1)}
+  #modal.open #modalBackdrop{opacity:1}
+  #modal.open .mpanel{opacity:1;transform:none}
+
+  #loaderWord{transform:translateY(120%)}
+  .giant{font-size:clamp(4.2rem,8.5vw,7.5rem);font-weight:200;line-height:.95;letter-spacing:-.04em}
+</style>
+</head>
+
+<body class="bg-ink text-white antialiased">
+
+<!-- ══════════ PRELOADER ══════════ -->
+<div id="loader" class="fixed inset-0 z-[100] flex items-center justify-center bg-ink">
+  <div class="text-center">
+    <div class="overflow-hidden">
+      <div id="loaderWord" class="text-2xl font-semibold tracking-[0.5em] text-white pl-2">FLOATCHAT</div>
+    </div>
+    <div id="loaderLine" class="mx-auto mt-4 h-px w-0 bg-gold/70"></div>
+    <div id="loaderSub" class="mt-4 font-mono text-[9px] tracking-[0.35em] text-white/35">OCEAN INTELLIGENCE · PPI FUND</div>
+  </div>
+</div>
+
+<!-- ══════════ FIXED WEBGL STAGE ══════════ -->
+<canvas id="gl" class="fixed inset-0 z-0 h-full w-full"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header id="siteHeader" class="fixed inset-x-0 top-0 z-50">
+  <div class="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-6 md:px-10">
+    <a href="#hero" class="flex items-center gap-3">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="16" cy="16" r="8" fill="#D4AF37"/>
+        <ellipse cx="16" cy="16" rx="13.5" ry="4.6" stroke="#D4AF37" stroke-opacity="0.55" transform="rotate(-16 16 16)"/>
+      </svg>
+      <span class="text-sm font-semibold tracking-[0.22em]">FLOATCHAT</span>
+      <span class="hidden rounded border border-gold/25 px-1.5 py-0.5 font-mono text-[9px] tracking-[0.2em] text-gold/80 sm:inline">PPI FUND</span>
+    </a>
+    <nav class="hidden items-center gap-8 text-[13px] text-white/55 md:flex">
+      <a href="#thesis" class="hover:text-white">Thesis</a>
+      <a href="#economics" class="hover:text-white">Economics</a>
+      <a href="#yield" class="hover:text-white">Yield</a>
+      <a href="#fleet" class="hover:text-white">Coverage</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/Suryamoorthy-C/FLOATCHAT" target="_blank" rel="noopener" aria-label="GitHub repository"
+         class="hidden h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white/60 hover:border-gold/40 hover:text-gold sm:flex">
+        <i data-lucide="github" class="h-4 w-4"></i>
+      </a>
+      <button id="btnDeck" class="btn-ghost openDeck rounded-full px-5 py-2 text-[13px] font-medium text-white/85">Fund Deck</button>
+    </div>
+  </div>
+  <div class="h-px w-full bg-white/5"><div id="pbar" class="h-full w-0 bg-gold/70"></div></div>
+</header>
+
+<main class="relative z-10">
+
+  <!-- ══════════ 1 · HERO ══════════ -->
+  <section id="hero" class="relative flex min-h-screen items-center overflow-hidden">
+    <div id="pearlDrag" class="absolute bottom-14 right-0 top-0 z-20 hidden w-[46%] md:block" aria-hidden="true">
+      <div class="pointer-events-none absolute bottom-2 left-2 flex items-center gap-2 font-mono text-[9px] tracking-[0.25em] text-white/30">
+        <i data-lucide="rotate-3d" class="h-3.5 w-3.5 text-gold/70"></i> DRAG TO ROTATE THE PEARL
+      </div>
+    </div>
+
+    <div id="heroChips" class="pointer-events-none absolute right-[5%] top-[20%] z-10 hidden flex-col gap-3 xl:flex">
+      <div class="chip">FLC-03 · SST <span id="chipSstV" class="text-champa transition-colors">28.34</span> °C</div>
+      <div class="chip">FLC-07 · DO <span id="chipDoV" class="text-champa transition-colors">6.71</span> mL/L</div>
+      <div class="chip"><span class="pulse-dot"></span> FLEET 12 / 12 ONLINE</div>
+    </div>
+
+    <div class="relative z-10 mx-auto w-full max-w-7xl px-6 pb-32 pt-24 md:px-10">
+      <div class="max-w-3xl">
+        <div id="heroBadge" class="badge-glow inline-flex items-center gap-2.5 rounded-full border border-gold/25 bg-gold/[0.04] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-champa">
+          <span class="pulse-dot"></span> The Future of B2G &amp; Commercial Marine Intelligence
+        </div>
+
+        <h1 class="mt-8 text-[clamp(2.7rem,6.4vw,5.8rem)] font-semibold leading-[1.04] tracking-[-0.03em]">
+          <span class="hline"><span>Investing in the</span></span>
+          <span class="hline"><span>Multi-Million Dollar</span></span>
+          <span class="hline"><span class="fx">Ocean Economy<span class="not-italic text-gold">.</span></span></span>
+        </h1>
+
+        <p id="heroSub" class="mt-7 max-w-xl text-[15px] leading-relaxed text-mist">
+          FloatChat builds and rents AI-native BGC-Argo floats to pearl lease operators —
+          turning raw ocean telemetry into annuity cash flows, software margins, and heavier pearl grades.
+        </p>
+
+        <div id="typerWrap" class="mt-5 min-h-[1.6em] font-mono text-[13px] text-champa/90 md:text-sm">
+          <span class="text-gold">›</span> <span id="typerText"></span><span class="caret"></span>
+        </div>
+
+        <div id="heroCtas" class="mt-10 flex flex-wrap gap-4">
+          <a href="#fleet" class="btn-gold inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold">
+            Explore Live Fleet <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          </a>
+          <a href="#economics" class="btn-ghost inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-medium text-white/90">
+            Investor Financial Model <i data-lucide="trending-up" class="h-4 w-4 text-gold"></i>
+          </a>
+        </div>
+
+        <div id="heroStats" class="mt-12 flex flex-wrap items-center gap-x-10 gap-y-4">
+          <div><div class="tabular font-mono text-lg text-champa">$37.5K</div><div class="label mt-1 !text-white/35">CAPEX / FLOAT</div></div>
+          <div class="hidden h-8 w-px bg-white/10 sm:block"></div>
+          <div><div class="tabular font-mono text-lg text-champa">$45.0K</div><div class="label mt-1 !text-white/35">ARR / FLOAT</div></div>
+          <div class="hidden h-8 w-px bg-white/10 sm:block"></div>
+          <div><div class="tabular font-mono text-lg text-champa">93%</div><div class="label mt-1 !text-white/35">Y2+ GROSS MARGIN</div></div>
+          <div class="hidden h-8 w-px bg-white/10 sm:block"></div>
+          <div><div class="tabular font-mono text-lg text-champa">10 MO</div><div class="label mt-1 !text-white/35">HARDWARE PAYBACK</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="scrollHint" class="absolute bottom-24 left-6 z-10 flex flex-col items-center gap-3 md:left-10">
+      <span class="font-mono text-[9px] tracking-[0.3em] text-white/40" style="writing-mode:vertical-rl">SCROLL</span>
+      <span class="scrollline"></span>
+    </div>
+
+    <div id="heroTicker" class="ticker absolute inset-x-0 bottom-0 z-30 overflow-hidden border-t border-white/5 bg-[#04050A]/70 py-3 backdrop-blur-md">
+      <div id="tickTrack"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ THESIS ══════════ -->
+  <section id="thesis" class="relative py-28 md:py-36">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <div data-reveal>
+        <span class="eyebrow">01 · The Thesis</span>
+        <h2 class="mt-6 max-w-3xl text-[clamp(2rem,4.2vw,3.4rem)] font-semibold leading-[1.1] tracking-[-0.02em]">
+          One asset. Two <span class="fx">compounding</span> cash engines.
+        </h2>
+      </div>
+      <div class="mt-16 grid gap-10 md:grid-cols-3 md:gap-8">
+        <div class="border-t border-white/10 pt-6 md:mt-0" data-reveal>
+          <span class="font-mono text-xs text-gold">01</span>
+          <h3 class="mt-4 text-xl font-medium">Hardware annuity</h3>
+          <p class="mt-3 text-sm leading-relaxed text-mist">BGC-Argo intelligence floats are rented, never sold. The wholesale unit returns its full capital in ten months — every month after that is annuity.</p>
+          <div class="mt-5 font-mono text-[10px] tracking-wider text-champa">$37.5K CAPEX → 10-MO PAYBACK → ANNUITY</div>
+        </div>
+        <div class="border-t border-white/10 pt-6 md:mt-16" data-reveal>
+          <span class="font-mono text-xs text-gold">02</span>
+          <h3 class="mt-4 text-xl font-medium">Software moat</h3>
+          <p class="mt-3 text-sm leading-relaxed text-mist">The FloatChat AI layer turns ocean profiles into operator decisions. It licenses at 93% gross margin and scales across the fleet with zero marginal hardware.</p>
+          <div class="mt-5 font-mono text-[10px] tracking-wider text-champa">93% GROSS MARGIN · ZERO MARGINAL HARDWARE</div>
+        </div>
+        <div class="border-t border-white/10 pt-6 md:mt-32" data-reveal>
+          <span class="font-mono text-xs text-gold">03</span>
+          <h3 class="mt-4 text-xl font-medium">Yield uplift</h3>
+          <p class="mt-3 text-sm leading-relaxed text-mist">Anomaly screening cuts oyster mortality by up to half and pushes harvests into grade-A gem territory — the biological wedge that wins and keeps leases.</p>
+          <div class="mt-5 font-mono text-[10px] tracking-wider text-champa">+20% GRADE-A · −50% MORTALITY</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 2 · INVESTOR CORE (ROI CALCULATOR) ══════════ -->
+  <section id="economics" class="relative py-28 md:py-36">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <div data-reveal>
+        <span class="eyebrow">02 · The Investor Core</span>
+        <h2 class="mt-6 max-w-3xl text-[clamp(2rem,4.2vw,3.4rem)] font-semibold leading-[1.1] tracking-[-0.02em]">
+          Underwrite the fleet <span class="fx">yourself.</span>
+        </h2>
+        <p class="mt-5 max-w-xl text-sm leading-relaxed text-mist">
+          Move the slider. Every line item — CapEx, rental annuity, breakeven, margin — recomputes live from the unit model.
+        </p>
+      </div>
+
+      <div class="mt-14 grid gap-8 lg:grid-cols-12">
+        <!-- Controls + counters -->
+        <div class="chart-frame spot self-start p-6 md:p-8 lg:col-span-4" data-reveal>
+          <div class="flex items-end justify-between">
+            <span class="label">FLEET SIZE</span>
+            <span class="font-mono text-[10px] tracking-wider text-white/35">1 — 20 BGC-ARGO FLOATS</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-3">
+            <span id="fleetReadout" class="tabular text-7xl font-extralight leading-none text-champa">08</span>
+            <span class="mb-1.5 text-sm text-mist">floats deployed</span>
+          </div>
+          <input id="fleetRange" type="range" min="1" max="20" step="1" value="8" class="mt-8" aria-label="Fleet size">
+          <div class="mt-2 flex justify-between font-mono text-[10px] text-white/30"><span>PILOT · 1</span><span>FUND SCALE · 20</span></div>
+          <p class="mt-5 text-xs leading-relaxed text-white/40">
+            $37,500 wholesale per float, rented at $3,750 / month. Hardware returns its capital in
+            10.0 months — then every month is margin.
+          </p>
+
+          <div class="mt-8 divide-y divide-white/5 border-y border-white/5">
+            <div class="flex items-baseline justify-between py-4">
+              <span class="font-mono text-[11px] tracking-[0.18em] text-white/45">UPFRONT CAPEX</span>
+              <span id="c-capex" class="tabular text-2xl font-light">$300,000</span>
+            </div>
+            <div class="flex items-baseline justify-between py-4">
+              <span class="font-mono text-[11px] tracking-[0.18em] text-white/45">MRR · STEADY STATE</span>
+              <span id="c-mrr" class="tabular text-2xl font-light">$30,000</span>
+            </div>
+            <div class="flex items-baseline justify-between py-4">
+              <span class="font-mono text-[11px] tracking-[0.18em] text-white/45">YEAR-1 REVENUE</span>
+              <span id="c-rev1" class="tabular text-2xl font-light">$360,000</span>
+            </div>
+            <div class="flex items-baseline justify-between py-4">
+              <span class="font-mono text-[11px] tracking-[0.18em] text-white/45">YEAR-2+ NET / YR</span>
+              <span id="c-net2" class="tabular text-2xl font-light text-champa">$334,800</span>
+            </div>
+            <div class="flex items-baseline justify-between py-4">
+              <span class="font-mono text-[11px] tracking-[0.18em] text-white/45">5-YEAR CUM. NET</span>
+              <span id="c-net5" class="tabular text-2xl font-light text-champa">$1,363,200</span>
+            </div>
+            <div class="flex items-center justify-between py-4">
+              <span class="font-mono text-[11px] tracking-[0.18em] text-white/45">HARDWARE PAYBACK</span>
+              <span class="flex items-baseline gap-2">
+                <span class="tabular text-2xl font-light text-champa">10.0</span>
+                <span class="text-xs text-mist">months</span>
+                <span class="chipmini gold">INVARIANT</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="space-y-8 lg:col-span-8">
+          <div class="chart-frame spot p-6 md:p-8" data-reveal>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span class="label">PAYBACK TIMELINE</span>
+                <p class="mt-1.5 text-xs text-white/40">Cumulative rental revenue vs hardware CapEx — crossover at Month 10.</p>
+              </div>
+              <span class="chipmini gold !ml-0">PAYBACK 10.0 MO · SCALE-INVARIANT</span>
+            </div>
+            <div class="relative mt-5 h-[300px] md:h-[350px]"><canvas id="chartPayback"></canvas></div>
+          </div>
+
+          <div class="chart-frame spot p-6 md:p-8" data-reveal>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span class="label">CUMULATIVE NET PROFIT · 36 MONTHS</span>
+                <p class="mt-1.5 text-xs text-white/40">Net of CapEx, satellite, cloud-AI and field service. Year 2+ runs at 93% gross margin.</p>
+              </div>
+              <span id="chart2Chip" class="chipmini gold !ml-0">CUM. NET @ M36 · $693,600</span>
+            </div>
+            <div class="relative mt-5 h-[280px] md:h-[320px]"><canvas id="chartProfit"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ledger table -->
+      <div class="chart-frame spot mt-8 overflow-hidden !rounded-2xl" data-reveal>
+        <div class="flex flex-wrap items-center justify-between gap-3 px-6 pt-6 md:px-8">
+          <span class="label">UNIT ECONOMICS — PER-FLOAT LEDGER</span>
+          <span class="font-mono text-[10px] tracking-wider text-white/35">ALL FIGURES USD</span>
+        </div>
+        <div class="mt-2 overflow-x-auto px-2 pb-2 md:px-4">
+          <table class="tabular w-full min-w-[680px] text-sm">
+            <thead>
+              <tr class="text-left font-mono text-[10px] tracking-[0.18em] text-white/35">
+                <th class="py-3 pl-4 font-normal md:pl-6">LINE ITEM</th>
+                <th class="py-3 text-right font-normal">PER FLOAT / YR</th>
+                <th class="py-3 pr-4 text-right font-normal md:pr-6">FLEET OF <span id="tFleet" class="text-gold">8</span></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              <tr><td colspan="3" class="pb-1 pl-4 pt-5 md:pl-6"><span class="secs">CAPITAL — ONE-TIME</span></td></tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/80 md:pl-6">BGC-Argo intelligence float · wholesale</td>
+                <td class="text-right text-white/70">$37,500</td>
+                <td class="fleetx text-right text-champa" data-base="37500">$300,000</td>
+              </tr>
+              <tr><td colspan="3" class="pb-1 pl-4 pt-5 md:pl-6"><span class="secs">REVENUE — RECURRING RENTAL</span></td></tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/80 md:pl-6">Hardware rental @ $3,750 / month</td>
+                <td class="text-right text-white/70">$45,000</td>
+                <td class="fleetx text-right text-champa" data-base="45000">$360,000</td>
+              </tr>
+              <tr><td colspan="3" class="pb-1 pl-4 pt-5 md:pl-6"><span class="secs">OPERATING COSTS</span></td></tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/70 md:pl-6">Satellite comms &amp; data plans</td>
+                <td class="text-right text-white/50">−$1,450</td>
+                <td class="fleetx text-right text-white/50" data-base="1450" data-neg="1">−$11,600</td>
+              </tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/70 md:pl-6">Cloud, AI inference &amp; FloatChat API</td>
+                <td class="text-right text-white/50">−$1,200</td>
+                <td class="fleetx text-right text-white/50" data-base="1200" data-neg="1">−$9,600</td>
+              </tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/70 md:pl-6">Field service &amp; recalibration</td>
+                <td class="text-right text-white/50">−$500</td>
+                <td class="fleetx text-right text-white/50" data-base="500" data-neg="1">−$4,000</td>
+              </tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/70 md:pl-6">Deployment &amp; commissioning <span class="text-white/35">(Year 1 only)</span></td>
+                <td class="text-right text-white/50">−$1,350</td>
+                <td class="fleetx text-right text-white/50" data-base="1350" data-neg="1">−$10,800</td>
+              </tr>
+              <tr class="font-medium">
+                <td class="py-3.5 pl-4 text-white/80 md:pl-6">Total Year-1 operating cost</td>
+                <td class="text-right text-white/70">−$4,500</td>
+                <td class="fleetx text-right text-white/70" data-base="4500" data-neg="1">−$36,000</td>
+              </tr>
+              <tr><td colspan="3" class="pb-1 pl-4 pt-5 md:pl-6"><span class="secs">CONTRIBUTION</span></td></tr>
+              <tr class="transition-colors hover:bg-white/[0.02]">
+                <td class="py-3.5 pl-4 text-white/80 md:pl-6">Year-1 net contribution / float<span class="chipmini">90.0% MARGIN</span></td>
+                <td class="text-right text-white/80">$40,500</td>
+                <td class="fleetx text-right font-medium text-champa" data-base="40500">$324,000</td>
+              </tr>
+              <tr style="background:rgba(212,175,55,0.045)">
+                <td class="py-3.5 pl-4 text-white/90 md:pl-6">Year-2+ net contribution / float<span class="chipmini gold">93.0% MARGIN</span></td>
+                <td class="text-right text-white/90">$41,850</td>
+                <td class="fleetx text-right font-semibold text-champa" data-base="41850">$334,800</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flex flex-wrap gap-x-8 gap-y-2 border-t border-white/5 px-6 py-4 font-mono text-[10px] tracking-wider text-white/45 md:px-8">
+          <span><b class="font-medium text-gold">10.0 MO</b> HARDWARE PAYBACK — SCALE-INVARIANT</span>
+          <span><b class="font-medium text-gold">93.0%</b> YEAR-2+ GROSS MARGIN</span>
+          <span><b class="font-medium text-gold">454%</b> 5-YEAR ROI ON CAPEX</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 3 · PEARL YIELD & EFFICIENCY ══════════ -->
+  <section id="yield" class="relative py-28 md:py-36">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <div data-reveal>
+        <span class="eyebrow">03 · Biological Alpha</span>
+        <h2 class="mt-6 max-w-3xl text-[clamp(2rem,4.2vw,3.4rem)] font-semibold leading-[1.1] tracking-[-0.02em]">
+          The moat is measured in <span class="fx">pearls.</span>
+        </h2>
+      </div>
+
+      <div class="mt-16 space-y-24 md:space-y-32">
+
+        <!-- Row A · Mortality -->
+        <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
+          <div class="lg:col-span-5" data-reveal>
+            <div class="giant"><span class="text-champa">−</span>50<span class="align-top text-[0.42em] leading-none text-champa">%</span></div>
+            <div class="label mt-4">OYSTER MORTALITY · MITIGATED</div>
+            <p class="mt-6 leading-relaxed text-mist">
+              FloatChat screens every thermal and dissolved-oxygen profile in real time. When water turns lethal —
+              marine heatwaves, hypoxic pulses — operators get an alert in hours, not after the harvest is lost.
+              Pilot lease blocks show a 30–50% reduction in crop mortality.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[11px] text-white/50">
+              <span class="flex items-center gap-2"><i data-lucide="timer" class="h-3.5 w-3.5 text-gold"></i>&lt; 6 HR ALERT LATENCY</span>
+              <span class="flex items-center gap-2"><i data-lucide="radar" class="h-3.5 w-3.5 text-gold"></i>24/7 ANOMALY SCREENING</span>
+              <span class="flex items-center gap-2"><i data-lucide="thermometer" class="h-3.5 w-3.5 text-gold"></i>SST · DO · CHL-A</span>
+            </div>
+          </div>
+          <div class="lg:col-span-7" data-reveal>
+            <div id="telemetryPanel" class="chart-frame spot p-6 md:p-7">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-alert"></span>
+                  <span class="label !text-white/70">LIVE TELEMETRY — LEASE BLOCK K-07</span>
+                </div>
+                <span class="rounded-full border border-white/10 px-2.5 py-1 font-mono text-[9px] tracking-[0.2em] text-white/35">BGC-ARGO · 10-MIN CYCLE</span>
+              </div>
+              <div class="relative mt-5">
+                <canvas id="telemetryCanvas" class="block w-full"></canvas>
+                <div id="anomalyBadge" class="pointer-events-none absolute right-4 top-3 flex max-w-[250px] translate-y-2 items-start gap-2 rounded-lg border border-alert/40 bg-[#1A0C09]/90 px-3 py-2 opacity-0">
+                  <i data-lucide="alert-triangle" class="h-3.5 w-3.5 shrink-0 text-alert"></i>
+                  <span id="abText" class="font-mono text-[9px] leading-relaxed tracking-wider text-[#F0907E]"></span>
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[9px] tracking-wider text-white/35">
+                <span class="flex items-center gap-2"><i data-lucide="thermometer" class="h-3 w-3 text-champa"></i>SST — SEA SURFACE TEMP</span>
+                <span class="flex items-center gap-2"><i data-lucide="droplets" class="h-3 w-3 text-[#6FA8DC]"></i>DO — DISSOLVED OXYGEN</span>
+                <span>DASHED = ALERT THRESHOLD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row B · Yield -->
+        <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
+          <div class="order-2 lg:order-1 lg:col-span-7" data-reveal>
+            <div class="chart-frame spot p-6 md:p-8">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <span class="label !text-white/70">HARVEST GRADE MIX — 10,000-OYSTER BLOCK</span>
+                <div class="flex rounded-full border border-white/10 p-1">
+                  <button class="segBtn rounded-full px-4 py-1.5 font-mono text-[10px] tracking-wider text-white/60" data-mode="base">BASELINE</button>
+                  <button class="segBtn active rounded-full px-4 py-1.5 font-mono text-[10px] tracking-wider text-white/60" data-mode="fc">FLOATCHAT-ENABLED</button>
+                </div>
+              </div>
+
+              <div class="mt-7 flex h-16 w-full overflow-hidden rounded-lg ring-1 ring-white/10">
+                <div id="segA" class="gradebar flex items-center justify-center" style="width:34%;background:linear-gradient(180deg,#E3C56B,#C29A38)">
+                  <span id="segAL" class="font-mono text-xs font-semibold text-[#231A06]">34%</span>
+                </div>
+                <div id="segB" class="gradebar flex items-center justify-center" style="width:46%;background:#3D4F63">
+                  <span id="segBL" class="font-mono text-xs text-white/70">46%</span>
+                </div>
+                <div id="segC" class="gradebar flex items-center justify-center" style="width:20%;background:#18222E">
+                  <span id="segCL" class="font-mono text-xs text-white/50">20%</span>
+                </div>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[10px] tracking-wider text-white/45">
+                <span class="flex items-center gap-2"><i class="inline-block h-2 w-2 rounded-[2px]" style="background:#D4AF37"></i>GRADE-A GEM</span>
+                <span class="flex items-center gap-2"><i class="inline-block h-2 w-2 rounded-[2px]" style="background:#3D4F63"></i>GRADE-B</span>
+                <span class="flex items-center gap-2"><i class="inline-block h-2 w-2 rounded-[2px]" style="background:#18222E"></i>GRADE-C / INDUSTRIAL</span>
+              </div>
+
+              <div class="mt-7 flex flex-wrap items-end justify-between gap-4 border-t border-white/5 pt-6">
+                <div>
+                  <div class="label">GRADE-A PEARLS / BLOCK</div>
+                  <div class="mt-1.5 flex items-baseline gap-2">
+                    <span id="gradeA" class="tabular text-4xl font-extralight">3,400</span>
+                    <span class="text-xs text-mist">/ 10,000 oysters</span>
+                  </div>
+                </div>
+                <div id="yieldDelta" class="rounded-full border border-gold/30 bg-gold/5 px-4 py-2 font-mono text-[10px] tracking-wider text-champa">+620 GRADE-A GEMS · ≈ +$108K / HARVEST</div>
+              </div>
+            </div>
+          </div>
+          <div class="order-1 lg:order-2 lg:col-span-5" data-reveal>
+            <div class="giant"><span class="text-champa">+</span>20<span class="align-top text-[0.42em] leading-none text-champa">%</span></div>
+            <div class="label mt-4">TOP-TIER GRADE-A YIELD · UP TO</div>
+            <p class="mt-6 leading-relaxed text-mist">
+              Stable thermal windows grow nacre, not scars. Lease blocks running FloatChat intelligence shift their
+              harvest mix decisively into grade-A gem quality — the difference between commodity pearls and
+              auction-grade lots. Toggle the mix to see the uplift.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[11px] text-white/50">
+              <span class="flex items-center gap-2"><i data-lucide="shield-check" class="h-3.5 w-3.5 text-gold"></i>THERMAL WINDOW STABILITY</span>
+              <span class="flex items-center gap-2"><i data-lucide="trending-up" class="h-3.5 w-3.5 text-gold"></i>NACRE DEPOSITION INDEX</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 4 · FLEET DENSITY & COVERAGE ══════════ -->
+  <section id="fleet" class="relative py-28 md:py-36">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <div data-reveal>
+        <span class="eyebrow">04 · Coverage Model</span>
+        <h2 class="mt-6 max-w-3xl text-[clamp(2rem,4.2vw,3.4rem)] font-semibold leading-[1.1] tracking-[-0.02em]">
+          Four floats. Full lease. <span class="fx">Zero blind water.</span>
+        </h2>
+        <p class="mt-5 max-w-xl text-sm leading-relaxed text-mist">
+          A 5–20 km² commercial lease block is fully covered by a diamond formation of four BGC-Argo floats —
+          overlapping telemetry rings leave no thermal anomaly undetected.
+        </p>
+      </div>
+
+      <div class="mt-14 grid gap-8 lg:grid-cols-12">
+        <!-- Map -->
+        <div class="chart-frame spot p-4 md:p-6 lg:col-span-8" data-reveal>
+          <div id="mapWrap" class="relative">
+            <svg id="fleetMap" viewBox="0 0 760 470" class="block h-auto w-full" role="img" aria-label="Lease block coverage map">
+              <defs>
+                <pattern id="mgrid" width="38" height="38" patternUnits="userSpaceOnUse">
+                  <path d="M38 0H0V38" fill="none" stroke="rgba(120,160,200,0.08)" stroke-width="1"/>
+                </pattern>
+                <radialGradient id="sea" cx="50%" cy="42%" r="80%">
+                  <stop offset="0%" stop-color="#071627"/><stop offset="100%" stop-color="#040B14"/>
+                </radialGradient>
+              </defs>
+              <rect x="1" y="1" width="758" height="468" rx="14" fill="url(#sea)" stroke="rgba(255,255,255,0.08)"/>
+              <rect x="1" y="1" width="758" height="468" rx="14" fill="url(#mgrid)"/>
+              <!-- depth contours & coast -->
+              <path d="M-10 96 C 120 66, 240 130, 400 104 S 660 70, 770 108" stroke="rgba(96,144,196,0.16)" fill="none"/>
+              <path d="M-10 210 C 150 180, 300 250, 470 216 S 690 180, 770 214" stroke="rgba(96,144,196,0.12)" fill="none"/>
+              <path d="M-10 330 C 140 300, 300 370, 480 336 S 700 300, 770 334" stroke="rgba(96,144,196,0.14)" fill="none"/>
+              <path d="M600 -10 C 620 48, 700 62, 770 44 L 770 -10 Z" fill="rgba(150,180,210,0.05)" stroke="rgba(150,180,210,0.16)"/>
+              <!-- lease group (scales with area) -->
+              <g id="leaseG" transform="translate(380 240) scale(0.7746)">
+                <rect x="-132" y="-94.5" width="264" height="189" rx="6" fill="rgba(212,175,55,0.03)" stroke="#D4AF37" stroke-opacity="0.55" stroke-dasharray="6 5"/>
+                <path d="M-132 -100 v-8 M-138 -94.5 h-8 M132 -100 v-8 M138 -94.5 h8 M-132 100 v8 M-138 94.5 h-8 M132 100 v8 M138 94.5 h8" stroke="rgba(212,175,55,0.5)" stroke-width="1"/>
+                <path d="M-66 -47 L66 -47 M66 -47 L66 47 M66 47 L-66 47 M-66 47 L-66 -47 M-66 -47 L66 47 M66 -47 L-66 47" stroke="rgba(212,175,55,0.12)" stroke-dasharray="3 4"/>
+                <g class="fnode" data-i="0" transform="translate(-66 -47)">
+                  <circle class="covring" r="81.3" fill="rgba(212,175,55,0.045)" stroke="rgba(212,175,55,0.28)"/>
+                  <circle class="pulse" r="6" fill="none" stroke="rgba(212,175,55,0.7)" style="animation-delay:0s"/>
+                  <circle class="core" r="3.6" fill="#E9CE8F"/>
+                  <circle r="18" fill="transparent"/>
+                  <text y="-13" text-anchor="middle" class="nlabel">FLC-01</text>
+                </g>
+                <g class="fnode" data-i="1" transform="translate(66 -47)">
+                  <circle class="covring" r="81.3" fill="rgba(212,175,55,0.045)" stroke="rgba(212,175,55,0.28)"/>
+                  <circle class="pulse" r="6" fill="none" stroke="rgba(212,175,55,0.7)" style="animation-delay:.7s"/>
+                  <circle class="core" r="3.6" fill="#E9CE8F"/>
+                  <circle r="18" fill="transparent"/>
+                  <text y="-13" text-anchor="middle" class="nlabel">FLC-02</text>
+                </g>
+                <g class="fnode" data-i="2" transform="translate(-66 47)">
+                  <circle class="covring" r="81.3" fill="rgba(212,175,55,0.045)" stroke="rgba(212,175,55,0.28)"/>
+                  <circle class="pulse" r="6" fill="none" stroke="rgba(212,175,55,0.7)" style="animation-delay:1.4s"/>
+                  <circle class="core" r="3.6" fill="#E9CE8F"/>
+                  <circle r="18" fill="transparent"/>
+                  <text y="24" text-anchor="middle" class="nlabel">FLC-03</text>
+                </g>
+                <g class="fnode" data-i="3" transform="translate(66 47)">
+                  <circle class="covring" r="81.3" fill="rgba(212,175,55,0.045)" stroke="rgba(212,175,55,0.28)"/>
+                  <circle class="pulse" r="6" fill="none" stroke="rgba(212,175,55,0.7)" style="animation-delay:2.1s"/>
+                  <circle class="core" r="3.6" fill="#E9CE8F"/>
+                  <circle r="18" fill="transparent"/>
+                  <text y="24" text-anchor="middle" class="nlabel">FLC-04</text>
+                </g>
+              </g>
+              <text id="leaseLabel" x="380" y="152" text-anchor="middle" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em" fill="#D4AF37">LEASE BLOCK K-07 · 12 KM² · 4 FLOATS</text>
+              <g transform="translate(30 436)">
+                <path d="M0 0 H100" stroke="rgba(255,255,255,0.3)"/><path d="M0 -4 V4 M100 -4 V4" stroke="rgba(255,255,255,0.3)"/>
+                <text x="50" y="-8" text-anchor="middle" class="scaletext">2 KM</text>
+              </g>
+            </svg>
+            <!-- hover tooltip -->
+            <div id="floatTip" class="pointer-events-none absolute z-20 hidden w-52 rounded-lg border border-gold/30 bg-[#0A0D12]/95 p-3 shadow-2xl">
+              <div class="flex items-center justify-between font-mono text-[10px]">
+                <span id="tipId" class="text-gold">FLC-01</span>
+                <span class="text-emerald-400/90">● ONLINE</span>
+              </div>
+              <div class="mt-2 space-y-1 font-mono text-[10px] text-white/55">
+                <div class="flex justify-between"><span>BATTERY</span><span id="tipBat" class="text-white/85">94%</span></div>
+                <div class="flex justify-between"><span>SST</span><span id="tipSst" class="text-white/85">28.4 °C</span></div>
+                <div class="flex justify-between"><span>DO</span><span id="tipDo" class="text-white/85">6.7 mL/L</span></div>
+                <div class="flex justify-between"><span>LAST PROFILE</span><span id="tipProf" class="text-white/85">06:12 UTC</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="px-2 pb-1 pt-4 font-mono text-[9px] tracking-wider text-white/30">HOVER A NODE FOR LIVE UNIT STATUS · COVERAGE RINGS OVERLAP ≥ 2× ACROSS THE BLOCK</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="chart-frame spot self-start p-6 md:p-8 lg:col-span-4" data-reveal>
+          <span class="label">LEASE CONFIGURATION</span>
+          <div class="mt-4 flex items-baseline justify-between">
+            <span id="mA" class="tabular text-5xl font-extralight text-champa">12</span>
+            <span class="text-sm text-mist">km² lease block</span>
+          </div>
+          <input id="leaseRange" type="range" min="5" max="20" step="1" value="12" class="mt-7" aria-label="Lease area">
+          <div class="mt-2 flex justify-between font-mono text-[10px] text-white/30"><span>5 KM²</span><span>20 KM²</span></div>
+
+          <div class="mt-7 divide-y divide-white/5 border-y border-white/5">
+            <div class="flex items-baseline justify-between py-3.5">
+              <span class="font-mono text-[10px] tracking-[0.18em] text-white/45">COVERAGE RADIUS / FLOAT</span>
+              <span id="mR" class="tabular text-lg font-light">1.26 km</span>
+            </div>
+            <div class="flex items-baseline justify-between py-3.5">
+              <span class="font-mono text-[10px] tracking-[0.18em] text-white/45">FOOTPRINT / FLOAT</span>
+              <span id="mF" class="tabular text-lg font-light">3.0 km²</span>
+            </div>
+            <div class="flex items-baseline justify-between py-3.5">
+              <span class="font-mono text-[10px] tracking-[0.18em] text-white/45">FORMATION</span>
+              <span class="text-lg font-light">Diamond · 4 floats</span>
+            </div>
+          </div>
+
+          <div class="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-2 font-mono text-[11px] tracking-wider text-champa">
+            <i data-lucide="badge-check" class="h-3.5 w-3.5"></i>FULL COVERAGE · 0 BLIND KM²
+          </div>
+          <p class="mt-5 text-xs leading-relaxed text-white/40">
+            Coverage radius scales with lease area at r ≈ 0.36·√A km, keeping every point of the block inside at
+            least two overlapping telemetry rings.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 5 · INVITATION ══════════ -->
+  <section id="invitation" class="relative py-36 md:py-48">
+    <div class="mx-auto max-w-4xl px-6 text-center md:px-10">
+      <div data-reveal>
+        <span class="eyebrow justify-center">05 · The Invitation</span>
+        <h2 class="mt-8 text-[clamp(2.2rem,5vw,4.2rem)] font-semibold leading-[1.08] tracking-[-0.02em]">
+          Position your capital where the ocean <span class="fx">pays rent.</span>
+        </h2>
+        <p class="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-mist">
+          The PPI Fund blends hardware-annuity certainty with software-multiple upside —
+          underwritten by live ocean telemetry, not projections.
+        </p>
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <button id="ctaDeck" class="openDeck btn-gold inline-flex items-center gap-2.5 rounded-full px-8 py-4 text-sm font-semibold">
+            Request the Fund Deck <i data-lucide="arrow-right" class="h-4 w-4"></i>
+          </button>
+          <a href="https://github.com/Suryamoorthy-C/FLOATCHAT" target="_blank" rel="noopener"
+             class="btn-ghost inline-flex items-center gap-2.5 rounded-full px-8 py-4 text-sm font-medium text-white/90">
+            <i data-lucide="github" class="h-4 w-4"></i> Read the Open Repository
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer class="relative border-t border-white/5 py-10">
+    <div class="mx-auto flex max-w-7xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between md:px-10">
+      <div class="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <circle cx="16" cy="16" r="8" fill="#D4AF37"/>
+          <ellipse cx="16" cy="16" rx="13.5" ry="4.6" stroke="#D4AF37" stroke-opacity="0.55" transform="rotate(-16 16 16)"/>
+        </svg>
+        <span class="font-mono text-[11px] tracking-wider text-white/40">© 2025 FLOATCHAT · PPI FUND · SURYAMOORTHY C.</span>
+      </div>
+      <p class="max-w-md font-mono text-[9px] leading-relaxed tracking-wider text-white/25">
+        FIGURES ARE ILLUSTRATIVE PRO-FORMA PROJECTIONS FOR DILIGENCE DISCUSSION — NOT AN OFFER OF SECURITIES.
+        TELEMETRY VISUALS SIMULATED FROM BGC-ARGO DATA SCHEMAS.
+      </p>
+      <div class="flex gap-6 text-xs text-white/45">
+        <a class="openDeck cursor-pointer hover:text-gold">Investor Deck</a>
+        <a href="https://github.com/Suryamoorthy-C/FLOATCHAT" target="_blank" rel="noopener" class="hover:text-gold">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ══════════ MODAL ══════════ -->
+<div id="modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-6">
+  <div id="modalBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+  <div class="mpanel relative w-full max-w-md rounded-2xl border border-white/10 bg-[#07090D] p-8">
+    <button id="modalClose" class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/50 hover:border-white/30 hover:text-white" aria-label="Close">
+      <i data-lucide="x" class="h-4 w-4"></i>
+    </button>
+    <span class="eyebrow">INVESTOR RELATIONS</span>
+    <h3 class="mt-4 text-2xl font-semibold">The PPI Fund package</h3>
+    <p class="mt-3 text-sm leading-relaxed text-mist">
+      The fund deck, audited unit-economics model and live fleet telemetry archive are shared with qualified
+      investors under NDA.
+    </p>
+    <div class="mt-6 space-y-3 text-sm">
+      <a href="mailto:invest@floatchat.io" class="group flex items-center gap-3 rounded-lg border border-white/10 px-4 py-3 hover:border-gold/40">
+        <i data-lucide="mail" class="h-4 w-4 text-gold"></i>
+        <span class="text-white/80 group-hover:text-white">invest@floatchat.io</span>
+      </a>
+      <a href="https://github.com/Suryamoorthy-C/FLOATCHAT" target="_blank" rel="noopener" class="group flex items-center gap-3 rounded-lg border border-white/10 px-4 py-3 hover:border-gold/40">
+        <i data-lucide="github" class="h-4 w-4 text-gold"></i>
+        <span class="text-white/80 group-hover:text-white">github.com/Suryamoorthy-C/FLOATCHAT</span>
+      </a>
+    </div>
+    <a href="mailto:invest@floatchat.io" class="btn-gold mt-7 flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-semibold">
+      Email Investor Relations <i data-lucide="arrow-right" class="h-4 w-4"></i>
+    </a>
+    <p class="mt-4 text-center font-mono text-[9px] tracking-wider text-white/30">RESPONSE WITHIN 48 HOURS · QUALIFIED INVESTORS ONLY</p>
+  </div>
+</div>
+
+<!-- ══════════ THREE.JS — CINEMATIC PEARL SCENE ══════════ -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+(async () => {
+  try {
+    const THREE = await import('three');
+    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
+    boot(THREE, RoomEnvironment);
+  } catch (e) { console.warn('WebGL scene unavailable:', e); }
+})();
+
+function boot(THREE, RoomEnvironment) {
+  const canvas = document.getElementById('gl');
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  } catch (e) { return; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x030303, 0.028);
+  const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 60);
+  camera.position.set(0, 0, 7.2);
+
+  // Studio environment for PBR reflections
+  try {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.08).texture;
+    pmrem.dispose();
+  } catch (e) {}
+
+  const key  = new THREE.DirectionalLight(0xffe2a8, 2.4); key.position.set(4, 6, 7);   scene.add(key);
+  const fill = new THREE.DirectionalLight(0x2a5a8c, 1.2); fill.position.set(-7, -2, 4); scene.add(fill);
+  const rim  = new THREE.DirectionalLight(0xdfe8ff, 1.6); rim.position.set(-2, 4, -7);  scene.add(rim);
+  scene.add(new THREE.AmbientLight(0x0a192f, 0.7));
+
+  // ── Pearl rig ──
+  const pearlRoot = new THREE.Group(); scene.add(pearlRoot);
+  const inner = new THREE.Group(); pearlRoot.add(inner);   // user-draggable
+  const rig = new THREE.Group();   pearlRoot.add(rig);     // idle orbit rig
+
+  const pearlMat = new THREE.MeshPhysicalMaterial({
+    color: 0xC9A24B, metalness: 0.62, roughness: 0.16,
+    clearcoat: 1, clearcoatRoughness: 0.24,
+    iridescence: 0.95, iridescenceIOR: 1.55, iridescenceThicknessRange: [140, 500],
+    envMapIntensity: 1.4, transparent: true
+  });
+  inner.add(new THREE.Mesh(new THREE.SphereGeometry(1, 96, 96), pearlMat));
+
+  const cage = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.5, 1)),
+    new THREE.LineBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.22 }));
+  inner.add(cage);
+  const cage2 = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.1, 0)),
+    new THREE.LineBasicMaterial({ color: 0x5E86AE, transparent: true, opacity: 0.12 }));
+  inner.add(cage2);
+
+  // Orbit ring + BGC-Argo "orbiter"
+  const ringPts = [];
+  for (let i = 0; i <= 140; i++) { const a = i / 140 * Math.PI * 2; ringPts.push(new THREE.Vector3(Math.cos(a) * 2.35, 0, Math.sin(a) * 2.35)); }
+  const ringMat = new THREE.LineBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.3 });
+  const ring = new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), ringMat);
+  rig.add(ring);
+  rig.rotation.set(0.42, 0, -0.28);
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 16, 16), new THREE.MeshBasicMaterial({ color: 0xFFDF00 }));
+  rig.add(orb);
+
+  // Sonar pulse rings (emitted each orbit)
+  const sonar = [];
+  const sGeo = new THREE.RingGeometry(1.02, 1.05, 80);
+  for (let i = 0; i < 3; i++) {
+    const m = new THREE.Mesh(sGeo, new THREE.MeshBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+    m.visible = false; pearlRoot.add(m); sonar.push({ m, life: 0 });
+  }
+  const emitSonar = () => {
+    const s = sonar.find(s => s.life <= 0); if (!s) return;
+    s.life = 1; s.m.visible = true;
+    s.m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+  };
+  emitSonar();
+
+  // Warm halo
+  const haloC = document.createElement('canvas'); haloC.width = haloC.height = 256;
+  const hg = haloC.getContext('2d');
+  const grad = hg.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grad.addColorStop(0, 'rgba(255,232,180,0.85)'); grad.addColorStop(0.25, 'rgba(212,175,55,0.32)');
+  grad.addColorStop(0.6, 'rgba(212,175,55,0.08)'); grad.addColorStop(1, 'rgba(212,175,55,0)');
+  hg.fillStyle = grad; hg.fillRect(0, 0, 256, 256);
+  const haloTex = new THREE.CanvasTexture(haloC); haloTex.colorSpace = THREE.SRGBColorSpace;
+  const haloMat = new THREE.SpriteMaterial({ map: haloTex, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false });
+  const halo = new THREE.Sprite(haloMat); halo.scale.set(7.5, 7.5, 1); halo.position.z = -0.6; pearlRoot.add(halo);
+
+  // ── Marine-snow particle current (soft round sprites, shader-driven) ──
+  const PN = innerWidth < 768 ? 650 : 1300;
+  const pos = new Float32Array(PN * 3), seed = new Float32Array(PN * 3), psize = new Float32Array(PN);
+  for (let i = 0; i < PN; i++) {
+    pos[i*3] = (Math.random()*2-1)*8.5; pos[i*3+1] = (Math.random()*2-1)*5; pos[i*3+2] = (Math.random()*2-1)*3.2 - 0.6;
+    seed[i*3] = Math.random(); seed[i*3+1] = Math.random(); seed[i*3+2] = Math.random();
+    psize[i] = 6 + Math.random()*12;
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  pGeo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 3));
+  pGeo.setAttribute('aSize', new THREE.BufferAttribute(psize, 1));
+  const pMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uDim: { value: 1 }, uPearl: { value: new THREE.Vector3() }, uPR: { value: Math.min(devicePixelRatio, 2) } },
+    vertexShader: `
+      attribute vec3 aSeed; attribute float aSize;
+      uniform float uTime; uniform float uPR; uniform vec3 uPearl;
+      varying vec3 vCol; varying float vA;
+      void main(){
+        vec3 p = position;
+        p.x += sin(uTime*0.22 + aSeed.x*6.2831)*0.6;
+        p.y += sin(uTime*0.16 + aSeed.y*6.2831)*0.7;
+        p.z += cos(uTime*0.19 + aSeed.z*6.2831)*0.5;
+        vec4 wp = modelMatrix * vec4(p, 1.0);
+        float d = distance(wp.xyz, uPearl);
+        float warm = smoothstep(3.4, 0.7, d);
+        vCol = mix(vec3(0.16,0.35,0.55), vec3(0.86,0.71,0.38), warm*0.9);
+        vec4 mv = viewMatrix * wp;
+        float dist = -mv.z;
+        vA = (0.18 + 0.82*fract(aSeed.x*7.31)) * smoothstep(16.0, 6.0, dist);
+        gl_PointSize = aSize * uPR * (5.4 / dist);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      precision mediump float;
+      varying vec3 vCol; varying float vA; uniform float uDim;
+      void main(){
+        float d = length(gl_PointCoord - vec2(0.5));
+        float a = smoothstep(0.5, 0.06, d) * vA * uDim;
+        if (a < 0.003) discard;
+        gl_FragColor = vec4(vCol, a);
+      }`
+  });
+  const pCloud = new THREE.Points(pGeo, pMat); scene.add(pCloud);
+
+  // ── Scroll choreography: the pearl travels the narrative ──
+  const STATES = {
+    hero:       { x: 1.75, y: -0.08, s: 1.00, d: 1.00 },
+    thesis:     { x: 0.00, y: -1.25, s: 0.60, d: 0.50 },
+    economics:  { x: -2.60, y: -0.15, s: 0.85, d: 0.30 },
+    yield:      { x: -2.50, y: 0.10, s: 0.80, d: 0.45 },
+    fleet:      { x: 2.45, y: -1.15, s: 0.70, d: 0.40 },
+    invitation: { x: 0.00, y: 1.15, s: 0.90, d: 0.95 }
+  };
+  const target = { ...STATES.hero };
+  const cur = { x: STATES.hero.x, y: STATES.hero.y, s: STATES.hero.s, d: 1 };
+
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    Object.entries(STATES).forEach(([sel, st]) => {
+      ScrollTrigger.create({
+        trigger: '#' + sel, start: 'top 55%', end: 'bottom 55%',
+        onToggle: t => { if (t.isActive) Object.assign(target, st); }
+      });
+    });
+  }
+
+  const isNarrow = () => innerWidth < 768;
+  let idleY = 0, dragY = 0, dragX = 0, velY = 0, spinT = 0, spinC = 0, lastS = scrollY;
+  addEventListener('scroll', () => {
+    const d = Math.max(-140, Math.min(140, scrollY - lastS)); lastS = scrollY;
+    spinT += d * 0.0006;
+  }, { passive: true });
+
+  // Drag-to-rotate proxy (hero right half)
+  const dragEl = document.getElementById('pearlDrag');
+  if (dragEl) {
+    let down = false, lx = 0, ly = 0;
+    dragEl.addEventListener('pointerdown', e => { down = true; lx = e.clientX; ly = e.clientY; dragEl.setPointerCapture(e.pointerId); dragEl.classList.add('grabbing'); });
+    dragEl.addEventListener('pointermove', e => {
+      if (!down) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+      dragY += dx * 0.006; velY = dx * 0.006;
+      dragX = Math.max(-0.7, Math.min(0.7, dragX + dy * 0.0045));
+    });
+    const up = () => { down = false; dragEl.classList.remove('grabbing'); };
+    dragEl.addEventListener('pointerup', up); dragEl.addEventListener('pointercancel', up);
+  }
+
+  const mouse = { x: 0, y: 0 };
+  addEventListener('pointermove', e => {
+    mouse.x = (e.clientX / innerWidth - 0.5) * 2;
+    mouse.y = (e.clientY / innerHeight - 0.5) * 2;
+  }, { passive: true });
+
+  addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+    pMat.uniforms.uPR.value = Math.min(devicePixelRatio, 2);
+  });
+
+  let orbA = Math.PI * 0.15, lastT = performance.now() / 1000;
+  renderer.setAnimationLoop(() => {
+    const now = performance.now() / 1000;
+    const dt = Math.min(now - lastT, 0.05); lastT = now; const t = now;
+    const k = 1 - Math.exp(-dt * 3);
+
+    const dimT = target.d * (isNarrow() ? 0.6 : 1);
+    cur.x += (target.x - cur.x) * k; cur.y += (target.y - cur.y) * k;
+    cur.s += (target.s - cur.s) * k; cur.d += (dimT - cur.d) * k;
+
+    const xf = Math.min(1, camera.aspect / 1.5);
+    const sf = camera.aspect < 0.85 ? 0.75 : (camera.aspect < 1.3 ? 0.9 : 1);
+    pearlRoot.position.set(cur.x * xf, cur.y * sf + Math.sin(t * 0.75) * 0.05, 0);
+    pearlRoot.scale.setScalar(cur.s * sf);
+
+    idleY += dt * 0.16; velY *= Math.exp(-dt * 2.4); dragY += velY; dragX *= Math.exp(-dt * 0.25);
+    spinC += (spinT - spinC) * (1 - Math.exp(-dt * 4));
+    inner.rotation.y = idleY + dragY + spinC;
+    inner.rotation.x = Math.sin(t * 0.12) * 0.05 + dragX;
+    cage.rotation.y -= dt * 0.12; cage.rotation.x += dt * 0.04;
+    cage2.rotation.y += dt * 0.07; cage2.rotation.z -= dt * 0.03;
+    rig.rotation.y += dt * 0.05;
+
+    orbA += dt * 0.8;
+    if (orbA > Math.PI * 2) { orbA -= Math.PI * 2; emitSonar(); }
+    orb.position.set(Math.cos(orbA) * 2.35, 0, Math.sin(orbA) * 2.35);
+    sonar.forEach(s => {
+      if (s.life > 0) {
+        s.life -= dt / 1.6;
+        const p = 1 - Math.max(s.life, 0);
+        s.m.scale.setScalar(1 + p * 1.9);
+        s.m.material.opacity = Math.max(s.life, 0) * 0.38 * cur.d;
+        if (s.life <= 0) s.m.visible = false;
+      }
+    });
+
+    pCloud.position.y = scrollY * 0.00042;
+    pMat.uniforms.uTime.value = t;
+    pMat.uniforms.uDim.value = cur.d;
+    pMat.uniforms.uPearl.value.copy(pearlRoot.position);
+
+    pearlMat.opacity = 0.16 + 0.84 * cur.d;
+    pearlMat.envMapIntensity = 0.5 + 0.9 * cur.d;
+    haloMat.opacity = 0.3 * cur.d;
+    ringMat.opacity = 0.3 * cur.d;
+    cage.material.opacity = 0.22 * cur.d;
+    cage2.material.opacity = 0.12 * cur.d;
+
+    const ck = 1 - Math.exp(-dt * 2.2);
+    camera.position.x += (mouse.x * 0.35 - camera.position.x) * ck;
+    camera.position.y += (-mouse.y * 0.22 - camera.position.y) * ck;
+    camera.lookAt(0, 0, 0);
+
+    renderer.render(scene, camera);
+  });
+}
+</script>
+
+<!-- ══════════ APPLICATION LOGIC ══════════ -->
+<script>
+(function () {
+  'use strict';
+  const $  = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasGsap = !!window.gsap, hasST = hasGsap && !!window.ScrollTrigger;
+  if (hasST) gsap.registerPlugin(ScrollTrigger);
+  if (!hasGsap || RM) document.documentElement.classList.add('no-anim');
+
+  try { lucide.createIcons(); } catch (e) {}
+
+  const fmt$  = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
+  const paintRange = r => {
+    const p = (r.value - r.min) / (r.max - r.min) * 100;
+    r.style.background = `linear-gradient(90deg,#D4AF37 ${p}%,rgba(255,255,255,0.12) ${p}%)`;
+  };
+
+  /* ── Spotlight tracking ── */
+  $$('.spot').forEach(el => el.addEventListener('pointermove', e => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }));
+
+  /* ── Header, progress bar, smooth anchors ── */
+  const header = $('#siteHeader'), pbar = $('#pbar');
+  addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', scrollY > 30);
+    const max = document.documentElement.scrollHeight - innerHeight;
+    pbar.style.width = (max > 0 ? scrollY / max * 100 : 0) + '%';
+  }, { passive: true });
+  $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const t = $(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+  }));
+
+  /* ── Modal ── */
+  const modal = $('#modal');
+  const openModal  = () => { modal.classList.remove('hidden'); modal.classList.add('flex'); requestAnimationFrame(() => modal.classList.add('open')); };
+  const closeModal = () => { modal.classList.remove('open'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300); };
+  $$('.openDeck').forEach(b => b.addEventListener('click', openModal));
+  $('#modalClose').addEventListener('click', closeModal);
+  $('#modalBackdrop').addEventListener('click', closeModal);
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  /* ── Preloader + hero intro ── */
+  if (hasGsap && !RM) {
+    gsap.set('.hline > span', { yPercent: 120 });
+    gsap.set(['#heroBadge', '#heroSub', '#typerWrap', '#heroCtas', '#heroStats', '#scrollHint'], { opacity: 0, y: 26 });
+    gsap.set('#heroChips .chip', { opacity: 0, x: 18 });
+    gsap.set('#heroTicker', { yPercent: 101 });
+    gsap.set('#siteHeader', { y: -16, opacity: 0 });
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.to('#loaderWord', { y: 0, duration: .9 }, .15)
+      .to('#loaderLine', { width: 150, duration: .7, ease: 'power2.inOut' }, .5)
+      .to('#loaderSub', { opacity: 1, duration: .5 }, .75)
+      .to('#loader', { yPercent: -100, duration: .95, ease: 'expo.inOut' }, 1.7)
+      .set('#loader', { display: 'none' }, 2.7)
+      .to('#siteHeader', { y: 0, opacity: 1, duration: .8 }, 2.05)
+      .to('#heroBadge', { opacity: 1, y: 0, duration: .7 }, 2.0)
+      .to('.hline > span', { yPercent: 0, duration: 1.15, ease: 'power4.out', stagger: .11 }, 2.05)
+      .to('#heroSub', { opacity: 1, y: 0, duration: .8 }, 2.45)
+      .to('#typerWrap', { opacity: 1, y: 0, duration: .8 }, 2.55)
+      .to('#heroCtas', { opacity: 1, y: 0, duration: .8 }, 2.65)
+      .to('#heroStats', { opacity: 1, y: 0, duration: .8 }, 2.8)
+      .to('#heroChips .chip', { opacity: 1, x: 0, duration: .7, stagger: .12 }, 2.9)
+      .to('#heroTicker', { yPercent: 0, duration: .8, ease: 'power4.out' }, 3.0)
+      .to('#scrollHint', { opacity: 1, y: 0, duration: .7 }, 3.15);
+  } else {
+    const l = $('#loader'); if (l) l.remove();
+  }
+
+  /* ── Scroll reveals ── */
+  if (hasST && !RM) {
+    ScrollTrigger.batch('[data-reveal]', {
+      start: 'top 88%', once: true,
+      onEnter: els => gsap.to(els, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: .09 })
+    });
+  }
+
+  /* ── Dynamic subtext (typewriter) ── */
+  const phrases = [
+    'Hardware-rental cash flows — every float pays back in 10 months, then compounds.',
+    'An AI software moat: 93% gross margins on every added float.',
+    'Real-time ocean intelligence that lifts grade-A pearl yields up to 20%.'
+  ];
+  const typerEl = $('#typerText');
+  if (RM || !hasGsap) { typerEl.textContent = phrases[0]; }
+  else {
+    let pi = 0, ci = 0, del = false;
+    (function step() {
+      const p = phrases[pi];
+      if (!del) {
+        ci++; typerEl.textContent = p.slice(0, ci);
+        if (ci === p.length) { del = true; setTimeout(step, 2400); return; }
+        setTimeout(step, 26 + Math.random() * 30);
+      } else {
+        ci--; typerEl.textContent = p.slice(0, ci);
+        if (ci === 0) { del = false; pi = (pi + 1) % phrases.length; setTimeout(step, 380); return; }
+        setTimeout(step, 12);
+      }
+    })();
+  }
+
+  /* ── Hero telemetry ticker + live chips ── */
+  const TICKS = [
+    ['FLC-01', 'SST 28.41°C', 1], ['FLC-01', 'DO 6.72 mL/L', 0],
+    ['FLC-04', 'CHL-A 1.84 µg/L', 0], ['FLC-06', 'PROFILING 0–200 M', 0],
+    ['FLC-02', 'BAT 94%', 1], ['SYSTEM', 'PAYBACK 10.0 MO', 1],
+    ['SYSTEM', 'Y2+ MARGIN 93.0%', 1], ['FLC-09', 'GRADE-A YIELD +18%', 1],
+    ['FLEET', '12 / 12 ONLINE', 1], ['SYSTEM', 'GEM UPLIFT +20%', 1]
+  ];
+  const track = $('#tickTrack');
+  if (track) {
+    const html = TICKS.map(([a, b, g]) =>
+      `<span class="tk"><b class="font-medium ${g ? 'text-gold' : 'text-white/60'}">${a}</b>${b}</span>`).join('');
+    track.innerHTML = `<div class="tgroup">${html}</div><div class="tgroup" aria-hidden="true">${html}</div>`;
+  }
+  const flash = el => { el.classList.add('text-gold'); setTimeout(() => el.classList.remove('text-gold'), 700); };
+  setInterval(() => {
+    const cs = $('#chipSstV'), cd = $('#chipDoV');
+    if (cs) { cs.textContent = (28.15 + Math.random() * 0.45).toFixed(2); flash(cs); }
+    if (cd) { cd.textContent = (6.58 + Math.random() * 0.35).toFixed(2); flash(cd); }
+  }, 2600);
+
+  /* ══════════ ROI CALCULATOR ══════════ */
+  if (typeof Chart !== 'undefined') {
+    Chart.defaults.font.family = "'Inter',sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#8d97a3';
+    Object.assign(Chart.defaults.plugins.tooltip, {
+      backgroundColor: '#0B0F14', borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1,
+      titleColor: '#EDEDEF', bodyColor: '#9BA6B2', padding: 12, cornerRadius: 8,
+      usePointStyle: true, boxWidth: 6, boxHeight: 6
+    });
+    Object.assign(Chart.defaults.plugins.legend.labels, { usePointStyle: true, boxWidth: 5, boxHeight: 5, padding: 18, color: '#8d97a3' });
+  }
+  const SCX = {
+    grid: { display: false }, border: { color: 'rgba(255,255,255,0.08)' },
+    ticks: { maxTicksLimit: 9, font: { family: "'JetBrains Mono'", size: 10 },
+      callback: function (v) { return 'M' + this.getLabelForValue(v); } }
+  };
+  const SCY = {
+    grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false },
+    ticks: { font: { family: "'JetBrains Mono'", size: 10 },
+      callback: v => { const a = Math.abs(v); return (v < 0 ? '−$' : '$') + (a >= 1000 ? (a / 1000).toFixed(0) + 'K' : a); } }
+  };
+  const goldFill = () => ctx => {
+    const { ctx: c, chartArea: a } = ctx.chart;
+    if (!a) return 'rgba(212,175,55,0.12)';
+    const g = c.createLinearGradient(0, a.top, 0, a.bottom);
+    g.addColorStop(0, 'rgba(212,175,55,0.20)'); g.addColorStop(1, 'rgba(212,175,55,0)');
+    return g;
+  };
+  let mk1Idx = 10, mk2Idx = 12;
+  const mkMarker = getIdx => ({
+    id: 'marker',
+    afterDatasetsDraw(chart) {
+      const idx = getIdx(); if (idx == null || idx < 0) return;
+      const meta = chart.getDatasetMeta(chart.data.datasets.length > 2 ? 2 : 0);
+      const pt = meta.data && meta.data[idx]; if (!pt) return;
+      const { top, bottom, left, right } = chart.chartArea, g = chart.ctx;
+      g.save();
+      g.setLineDash([4, 4]); g.strokeStyle = 'rgba(212,175,55,0.5)';
+      g.beginPath(); g.moveTo(pt.x, pt.y); g.lineTo(pt.x, bottom); g.stroke();
+      g.setLineDash([]); g.fillStyle = '#D4AF37'; g.font = '600 9px "JetBrains Mono"'; g.textAlign = 'center';
+      g.fillText(chart.data.datasets.length > 2 ? 'PAYBACK · M10' : 'CASH BREAKEVEN · M12',
+        Math.max(left + 40, Math.min(right - 40, pt.x)), pt.y - 8);
+      g.restore();
+    }
+  });
+  const y2band = {
+    id: 'y2band',
+    beforeDatasetsDraw(chart) {
+      const x = chart.scales.x.getPixelForTick(12);
+      const { top, bottom, right } = chart.chartArea; if (x == null) return;
+      const g = chart.ctx; g.save();
+      g.fillStyle = 'rgba(212,175,55,0.045)'; g.fillRect(x, top, right - x, bottom - top);
+      g.fillStyle = 'rgba(212,175,55,0.7)'; g.font = '600 9px "JetBrains Mono"'; g.textAlign = 'left';
+      g.fillText('YEAR 2+ · 93% GROSS MARGIN', x + 10, top + 14);
+      g.restore();
+    }
+  };
+
+  const series1 = N => {
+    const L = [...Array(25).keys()];
+    return {
+      L,
+      rev: L.map(m => 3750 * N * m),
+      cap: L.map(() => 37500 * N),
+      net: L.map(m => 3750*N*m - 37500*N - 262.5*N*m - 112.5*N*Math.min(m, 12))
+    };
+  };
+  const series2 = N => {
+    const L = [...Array(37).keys()];
+    let c = -37500 * N;
+    const prof = L.map(m => { if (m === 0) return c; c += (m <= 12 ? 3375 : 3487.5) * N; return c; });
+    return { L, prof, rev: L.map(m => 45000 * N * m / 12) };
+  };
+
+  let ch1 = null, ch2 = null;
+  try {
+    const s1 = series1(8);
+    ch1 = new Chart($('#chartPayback'), {
+      type: 'line',
+      data: { labels: s1.L, datasets: [
+        { label: 'Cumulative rental revenue', data: s1.rev, borderColor: '#D4AF37', borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: '#D4AF37', fill: true, backgroundColor: goldFill(), order: 1 },
+        { label: 'Hardware CapEx (deployed)', data: s1.cap, borderColor: 'rgba(140,160,180,0.85)', borderDash: [5, 5], borderWidth: 1.4, pointRadius: 0, fill: false },
+        { label: 'Cumulative net cash flow', data: s1.net, borderColor: '#5E86AE', borderWidth: 1.5, pointRadius: 0, fill: false }
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => `${c.dataset.label}:  ${fmt$(c.parsed.y)}` } } },
+        scales: { x: { ...SCX }, y: { ...SCY, grace: '10%' } }
+      },
+      plugins: [mkMarker(() => mk1Idx)]
+    });
+    const s2 = series2(8);
+    ch2 = new Chart($('#chartProfit'), {
+      type: 'line',
+      data: { labels: s2.L, datasets: [
+        { label: 'Cumulative net profit', data: s2.prof, borderColor: '#D4AF37', borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: '#D4AF37', fill: true, backgroundColor: goldFill(), order: 1 },
+        { label: 'Cumulative revenue', data: s2.rev, borderColor: 'rgba(233,206,143,0.4)', borderDash: [2, 4], borderWidth: 1, pointRadius: 0, fill: false }
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => `${c.dataset.label}:  ${fmt$(c.parsed.y)}` } } },
+        scales: { x: { ...SCX }, y: { ...SCY, grace: '10%' } }
+      },
+      plugins: [y2band, mkMarker(() => mk2Idx)]
+    });
+  } catch (e) { console.warn('Charts unavailable:', e); }
+
+  /* counters */
+  const counters = new Map();
+  const tweenVal = (el, to, format) => {
+    if (hasGsap && !RM) {
+      const o = counters.get(el) || { v: 0 }; counters.set(el, o);
+      gsap.to(o, { v: to, duration: .7, ease: 'power2.out', overwrite: true, onUpdate: () => { el.textContent = format(o.v); } });
+    } else el.textContent = format(to);
+  };
+
+  const updateTable = N => {
+    $('#tFleet').textContent = N;
+    $$('.fleetx').forEach(td => {
+      const b = +td.dataset.base;
+      td.textContent = (td.dataset.neg === '1' ? '−$' : '$') + Math.round(b * N).toLocaleString('en-US');
+    });
+  };
+
+  const fleetRange = $('#fleetRange');
+  function updateCalc(N) {
+    $('#fleetReadout').textContent = String(N).padStart(2, '0');
+    paintRange(fleetRange);
+    tweenVal($('#c-capex'), 37500 * N, fmt$);
+    tweenVal($('#c-mrr'),   3750  * N, fmt$);
+    tweenVal($('#c-rev1'),  45000 * N, fmt$);
+    tweenVal($('#c-net2'),  41850 * N, fmt$);
+    tweenVal($('#c-net5'),  170400 * N, fmt$);
+    updateTable(N);
+    $('#chart2Chip').textContent = 'CUM. NET @ M36 · ' + fmt$(86700 * N);
+    if (ch1 && ch2) {
+      const s1 = series1(N), s2 = series2(N);
+      mk1Idx = s1.rev.findIndex((v, i) => v >= s1.cap[i]);
+      mk2Idx = s2.prof.findIndex(v => v >= 0);
+      ch1.data.datasets[0].data = s1.rev; ch1.data.datasets[1].data = s1.cap; ch1.data.datasets[2].data = s1.net;
+      ch2.data.datasets[0].data = s2.prof; ch2.data.datasets[1].data = s2.rev;
+      ch1.update('none'); ch2.update('none');
+    }
+  }
+  fleetRange.addEventListener('input', () => updateCalc(+fleetRange.value));
+  updateCalc(8);
+
+  /* ══════════ LIVE TELEMETRY (mortality mitigation) ══════════ */
+  const tc = $('#telemetryCanvas'), tctx = tc.getContext('2d');
+  let TW = 0; const TH = 236;
+  function sizeTel() {
+    const w = tc.parentElement.getBoundingClientRect().width;
+    TW = Math.max(w, 280);
+    tc.width = TW * devicePixelRatio; tc.height = TH * devicePixelRatio;
+    tc.style.width = TW + 'px'; tc.style.height = TH + 'px';
+    tctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  sizeTel(); addEventListener('resize', sizeTel);
+
+  const chSST = { key: 'sst', label: 'SST', unit: '°C',   base: 28.3, min: 27.2, max: 29.6, thr: 29.0, col: '232,206,143', v: 28.3, cur: 28.3, arr: [], anT: -10, e: 0, flagged: false };
+  const chDO  = { key: 'do',  label: 'DO',  unit: 'mL/L', base: 6.75, min: 4.4,  max: 7.8,  thr: 5.6,  col: '111,168,220', v: 6.75, cur: 6.75, arr: [], anT: -10, e: 0, flagged: false };
+  const LEN = 120;
+  [chSST, chDO].forEach(ch => { let v = ch.base; for (let i = 0; i < LEN; i++) { v += (Math.random() - .5) * .05 + (ch.base - v) * .02; ch.arr.push(v); } ch.v = v; });
+  let nextAn = 4;
+  const env = t => t < 0 ? 0 : t < .4 ? t / .4 : t < 1 ? 1 : t < 2.6 ? Math.max(0, 1 - (t - 1) / 1.6) : 0;
+
+  function fireBadge(ch) {
+    const sig = ch.key === 'sst' ? '+1.8' : '−1.6';
+    $('#abText').textContent = `${ch.label} ANOMALY ${sig}σ — ALERT DISPATCHED TO LEASE MANAGER`;
+    const b = $('#anomalyBadge');
+    b.classList.remove('opacity-0', 'translate-y-2'); b.classList.add('opacity-100', 'translate-y-0');
+    clearTimeout(b._t);
+    b._t = setTimeout(() => { b.classList.add('opacity-0', 'translate-y-2'); b.classList.remove('opacity-100', 'translate-y-0'); }, 3400);
+  }
+  function telStep(dt) {
+    nextAn -= dt;
+    if (nextAn <= 0) {
+      const ch = Math.random() < .55 ? chSST : chDO;
+      ch.anT = 0; ch.flagged = false; nextAn = 6 + Math.random() * 6;
+    }
+    [chSST, chDO].forEach(ch => {
+      ch.anT += dt;
+      ch.v += (Math.random() - .5) * .055 + (ch.base - ch.v) * .02;
+      ch.e = env(ch.anT);
+      ch.cur = ch.key === 'sst' ? ch.v + ch.e * 1.8 : ch.v - ch.e * 1.9;
+      ch.arr.push(ch.cur); if (ch.arr.length > LEN) ch.arr.shift();
+      if (!ch.flagged && ch.e > .45 && ((ch.key === 'sst' && ch.cur > ch.thr) || (ch.key === 'do' && ch.cur < ch.thr))) {
+        ch.flagged = true; fireBadge(ch);
+      }
+    });
+  }
+  function drawCh(ch, x0, y0, w, h) {
+    const g = tctx;
+    const ty = y0 + h - ((ch.thr - ch.min) / (ch.max - ch.min)) * h;
+    g.setLineDash([4, 4]); g.strokeStyle = 'rgba(228,87,61,0.4)';
+    g.beginPath(); g.moveTo(x0, ty); g.lineTo(x0 + w, ty); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = 'rgba(255,255,255,0.04)';
+    [.33, .66].forEach(f => { g.beginPath(); g.moveTo(x0, y0 + h * f); g.lineTo(x0 + w, y0 + h * f); g.stroke(); });
+    g.beginPath();
+    ch.arr.forEach((v, i) => {
+      const px = x0 + i / (LEN - 1) * w, py = y0 + h - ((v - ch.min) / (ch.max - ch.min)) * h;
+      i ? g.lineTo(px, py) : g.moveTo(px, py);
+    });
+    g.strokeStyle = `rgba(${ch.col},0.85)`; g.lineWidth = 1.5; g.stroke();
+    g.lineTo(x0 + w, y0 + h); g.lineTo(x0, y0 + h); g.closePath();
+    g.fillStyle = `rgba(${ch.col},0.05)`; g.fill();
+    // anomaly overlay on the recent window
+    if (ch.e > 0) {
+      g.beginPath(); let started = false;
+      const s0 = Math.max(0, LEN - Math.round(LEN * .28));
+      ch.arr.forEach((v, i) => {
+        if (i < s0) return;
+        const px = x0 + i / (LEN - 1) * w, py = y0 + h - ((v - ch.min) / (ch.max - ch.min)) * h;
+        started ? g.lineTo(px, py) : (g.moveTo(px, py), started = true);
+      });
+      g.strokeStyle = 'rgba(228,87,61,0.9)'; g.lineWidth = 1.8; g.stroke();
+    }
+    const ly = y0 + h - ((ch.arr[ch.arr.length - 1] - ch.min) / (ch.max - ch.min)) * h;
+    g.beginPath(); g.arc(x0 + w - 2, ly, 3, 0, 7); g.fillStyle = `rgba(${ch.col},1)`; g.fill();
+    g.font = '500 10px "JetBrains Mono",monospace'; g.textAlign = 'left';
+    g.fillStyle = `rgba(${ch.col},0.9)`;
+    g.fillText(`${ch.label} ${ch.cur.toFixed(2)} ${ch.unit}`, x0 + 2, y0 + 12);
+    g.fillStyle = 'rgba(228,87,61,0.55)'; g.textAlign = 'right';
+    g.fillText(ch.key === 'sst' ? 'ALERT > 29.0°C' : 'ALERT < 5.6 mL/L', x0 + w - 2, y0 + 12);
+    g.textAlign = 'left';
+  }
+  function drawTel() {
+    tctx.clearRect(0, 0, TW, TH);
+    const half = (TH - 44) / 2;
+    drawCh(chSST, 0, 8, TW - 6, half);
+    drawCh(chDO, 0, half + 34, TW - 6, half);
+  }
+  let telVisible = false, telAcc = 0, telLast = performance.now();
+  new IntersectionObserver(e => telVisible = e[0].isIntersecting, { threshold: .05 }).observe($('#telemetryPanel'));
+  (function telLoop(now) {
+    requestAnimationFrame(telLoop);
+    const dt = Math.min((now - telLast) / 1000, .1); telLast = now;
+    if (!telVisible) return;
+    telAcc += dt;
+    while (telAcc > .13) { telStep(.13); telAcc -= .13; }
+    drawTel();
+  })(performance.now());
+
+  /* ══════════ YIELD TOGGLE ══════════ */
+  const MODES = { base: { a: 34, b: 46, c: 20, n: 3400 }, fc: { a: 40, b: 47, c: 13, n: 4020 } };
+  const segBtns = $$('.segBtn');
+  function setMode(m) {
+    const d = MODES[m];
+    $('#segA').style.width = d.a + '%'; $('#segB').style.width = d.b + '%'; $('#segC').style.width = d.c + '%';
+    $('#segAL').textContent = d.a + '%'; $('#segBL').textContent = d.b + '%'; $('#segCL').textContent = d.c + '%';
+    tweenVal($('#gradeA'), d.n, n => Math.round(n).toLocaleString('en-US'));
+    const chip = $('#yieldDelta');
+    if (m === 'fc') {
+      chip.textContent = '+620 GRADE-A GEMS · ≈ +$108K / HARVEST';
+      chip.className = 'rounded-full border border-gold/30 bg-gold/5 px-4 py-2 font-mono text-[10px] tracking-wider text-champa';
+    } else {
+      chip.textContent = 'BASELINE HARVEST MIX — NO INTELLIGENCE LAYER';
+      chip.className = 'rounded-full border border-white/10 bg-white/[0.02] px-4 py-2 font-mono text-[10px] tracking-wider text-white/40';
+    }
+    segBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  }
+  segBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  setMode('fc');
+
+  /* ══════════ FLEET DENSITY MAP ══════════ */
+  const FLEET = [
+    { id: 'FLC-01', bat: 94, sst: 28.4, d: 6.7, prof: '06:12 UTC' },
+    { id: 'FLC-02', bat: 88, sst: 28.6, d: 6.6, prof: '06:12 UTC' },
+    { id: 'FLC-03', bat: 91, sst: 28.3, d: 6.8, prof: '12:04 UTC' },
+    { id: 'FLC-04', bat: 97, sst: 28.5, d: 6.9, prof: '12:04 UTC' }
+  ];
+  const leaseRange = $('#leaseRange'), leaseG = $('#leaseG'), leaseLabel = $('#leaseLabel');
+  function updMap() {
+    const A = +leaseRange.value, k = Math.sqrt(A / 20);
+    leaseG.setAttribute('transform', `translate(380 240) scale(${k.toFixed(4)})`);
+    leaseLabel.setAttribute('y', (240 - 94.5 * k - 16).toFixed(1));
+    leaseLabel.textContent = `LEASE BLOCK K-07 · ${A} KM² · 4 FLOATS`;
+    $('#mA').textContent = A;
+    $('#mR').textContent = (0.3635 * Math.sqrt(A)).toFixed(2) + ' km';
+    $('#mF').textContent = (A / 4).toFixed(1) + ' km²';
+    paintRange(leaseRange);
+  }
+  leaseRange.addEventListener('input', updMap);
+  updMap();
+
+  const tip = $('#floatTip'), mapWrap = $('#mapWrap');
+  $$('.fnode').forEach(n => {
+    n.addEventListener('pointerenter', () => {
+      const f = FLEET[+n.dataset.i];
+      $('#tipId').textContent = f.id;
+      $('#tipBat').textContent = f.bat + '%';
+      $('#tipSst').textContent = f.sst.toFixed(1) + ' °C';
+      $('#tipDo').textContent = f.d.toFixed(1) + ' mL/L';
+      $('#tipProf').textContent = f.prof;
+      const r = n.querySelector('.core').getBoundingClientRect(), w = mapWrap.getBoundingClientRect();
+      let L = r.left - w.left + r.width / 2 - 104; L = Math.max(8, Math.min(w.width - 216, L));
+      let T = r.top - w.top - 128; if (T < 4) T = r.top - w.top + 18;
+      tip.style.left = L + 'px'; tip.style.top = T + 'px';
+      tip.classList.remove('hidden');
+    });
+    n.addEventListener('pointerleave', () => tip.classList.add('hidden'));
+  });
+})();
+</script>
+</body>
+</html>
